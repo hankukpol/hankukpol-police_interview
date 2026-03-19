@@ -91,7 +91,7 @@ export default function StudentLoginPage() {
       <div className="w-full max-w-[320px] flex flex-col gap-10">
         {/* 타이틀 / 로고 */}
         <h1 className="text-2xl font-extrabold text-center tracking-tight break-keep text-gray-900 whitespace-pre-wrap">
-          {(appName || '면접 모바일 접수증').split(/<br\s*\/?>/i).map((line, i, arr) => (
+          {(appName || '경찰 면접 모바일 수강증').split(/<br\s*\/?>/i).map((line, i, arr) => (
             <span key={i}>
               {line}
               {i < arr.length - 1 && <br />}

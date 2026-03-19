@@ -98,7 +98,7 @@ export default function ReceiptPage() {
         refund: { title: refundRow?.title ?? '환불규정', body: refundRow?.body ?? '', active: refundRow?.is_active ?? false },
       }
       const receipts = rec.receipts ?? {}
-      const appName = appCfg?.app_name ?? '면접 모바일 접수증'
+      const appName = appCfg?.app_name ?? '경찰 면접 모바일 수강증'
       prevReceiptsRef.current = receipts
       setData({ student, materials: mats.materials ?? [], receipts, token, appName, popups })
       if (popups.notice.active) setModal('notice')

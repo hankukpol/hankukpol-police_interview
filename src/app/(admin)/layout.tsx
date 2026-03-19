@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               A
             </div>
             <div>
-              <div className="text-[13px] font-bold text-white leading-tight">면접 접수 관리</div>
+              <div className="text-[13px] font-bold text-white leading-tight">경찰 면접 수강증 관리</div>
               <div className="text-[11px] text-slate-500 mt-0.5">Admin Dashboard</div>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="md:hidden bg-[#0f172a] px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-blue-600 flex items-center justify-center text-white font-bold text-[11px]">A</div>
-            <span className="text-[13px] font-bold text-white">면접 접수 관리</span>
+            <span className="text-[13px] font-bold text-white">경찰 면접 수강증 관리</span>
           </div>
           <button
             onClick={async () => {

@@ -144,7 +144,7 @@ export default function ConfigPage() {
             value={appName}
             onChange={e => setAppName(e.target.value)}
             className={inputCls}
-            placeholder="최준 면접 모바일 접수증"
+            placeholder="경찰 면접 모바일 수강증"
           />
         </div>
         <div className="space-y-1">

@@ -13,7 +13,7 @@ const getThemeConfig = unstable_cache(
       map[row.config_key] = (row.config_value as string).replace(/^"|"$/g, '')
     }
     return {
-      app_name: map['app_name'] ?? '최준 면접 모바일 접수증',
+      app_name: map['app_name'] ?? '경찰 면접 모바일 수강증',
       theme_color: map['theme_color'] ?? '#1a237e',
     }
   },

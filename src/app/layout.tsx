@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '최준 면접 모바일 접수증',
-  description: '자료 배부 QR 접수 시스템',
+  title: '경찰 면접 모바일 수강증',
+  description: '경찰 면접 모바일 수강증 및 자료 배부 시스템',
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
