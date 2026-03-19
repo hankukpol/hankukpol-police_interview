@@ -4,14 +4,15 @@ setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0"
 
 set "CHECK_ONLY=0"
-set "RUN_BUILD=0"
+set "RUN_BUILD=1"
 set "AUTO_YES=0"
-set "DIRECT_VERCEL=1"
+set "DIRECT_VERCEL=0"
 set "HAS_VERCEL_LINK=0"
 set "HAS_LOCAL_CHANGES=0"
 set "LIKELY_PROD=0"
 set "CURRENT_BRANCH="
 set "COMMIT_MESSAGE="
+set "ORIGIN_URL="
 
 :parse_args
 if "%~1"=="" goto args_done
@@ -22,6 +23,11 @@ if /I "%~1"=="--check" (
 )
 if /I "%~1"=="--with-build" (
   set "RUN_BUILD=1"
+  shift
+  goto parse_args
+)
+if /I "%~1"=="--skip-build" (
+  set "RUN_BUILD=0"
   shift
   goto parse_args
 )
@@ -69,10 +75,12 @@ if errorlevel 1 (
   exit /b 1
 )
 
-where npx >nul 2>&1
-if errorlevel 1 (
-  echo [deploy] npx is not installed or not available on PATH.
-  exit /b 1
+if "%DIRECT_VERCEL%"=="1" (
+  where npx >nul 2>&1
+  if errorlevel 1 (
+    echo [deploy] npx is not installed or not available on PATH.
+    exit /b 1
+  )
 )
 
 if not exist package.json (
@@ -92,8 +100,8 @@ if not defined CURRENT_BRANCH (
   exit /b 1
 )
 
-git remote get-url origin >nul 2>&1
-if errorlevel 1 (
+for /f "delims=" %%i in ('git remote get-url origin 2^>nul') do set "ORIGIN_URL=%%i"
+if not defined ORIGIN_URL (
   echo [deploy] Git remote 'origin' was not found.
   exit /b 1
 )
@@ -103,15 +111,21 @@ if /I "%CURRENT_BRANCH%"=="main" set "LIKELY_PROD=1"
 if /I "%CURRENT_BRANCH%"=="master" set "LIKELY_PROD=1"
 
 echo [deploy] Branch: %CURRENT_BRANCH%
-if "%HAS_VERCEL_LINK%"=="1" (
-  echo [deploy] Vercel project link detected.
+echo [deploy] Origin: %ORIGIN_URL%
+if "%RUN_BUILD%"=="1" (
+  echo [deploy] Build check: enabled.
 ) else (
-  echo [deploy] No .vercel\project.json file was found.
+  echo [deploy] Build check: skipped.
 )
 if "%DIRECT_VERCEL%"=="1" (
-  echo [deploy] Mode: push plus direct Vercel production deploy.
+  echo [deploy] Deploy mode: git push plus direct Vercel production deploy.
 ) else (
-  echo [deploy] Mode: push only.
+  echo [deploy] Deploy mode: git push plus Vercel Git auto deploy.
+)
+if "%HAS_VERCEL_LINK%"=="1" (
+  echo [deploy] Local Vercel link detected.
+) else (
+  echo [deploy] No local Vercel link found. This only matters for --direct-vercel.
 )
 
 if "%CHECK_ONLY%"=="1" (
@@ -127,7 +141,7 @@ if "%RUN_BUILD%"=="1" (
     exit /b 1
   )
 ) else (
-  echo [deploy] Local build check skipped. Use --with-build to run npm run build first.
+  echo [deploy] Build step skipped by request.
 )
 
 echo [deploy] Current working tree:
@@ -139,9 +153,9 @@ if errorlevel 1 goto push_step
 set "HAS_LOCAL_CHANGES=1"
 if "%AUTO_YES%"=="0" (
   if "%DIRECT_VERCEL%"=="1" (
-    choice /M "Stage all changes, commit, push, and run direct Vercel deploy"
+    choice /M "Stage all changes, commit, push, and run direct Vercel production deploy"
   ) else (
-    choice /M "Stage all changes, commit, and push this branch"
+    choice /M "Stage all changes, commit, push, and trigger Vercel Git auto deploy"
   )
   if errorlevel 2 (
     echo [deploy] Cancelled.
@@ -149,7 +163,7 @@ if "%AUTO_YES%"=="0" (
   )
 )
 
-if not defined COMMIT_MESSAGE set "COMMIT_MESSAGE=deploy: %DATE% %TIME%"
+if not defined COMMIT_MESSAGE set "COMMIT_MESSAGE=deploy: sync %CURRENT_BRANCH% for vercel"
 
 echo [deploy] Staging all changes...
 git add -A
@@ -182,12 +196,12 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if "%HAS_VERCEL_LINK%"=="0" (
-  echo [deploy] Git push completed. Direct Vercel deploy was skipped because no local Vercel link was found.
-  exit /b 0
-)
-
 if "%DIRECT_VERCEL%"=="1" (
+  if "%HAS_VERCEL_LINK%"=="0" (
+    echo [deploy] Git push completed. Direct Vercel deploy was skipped because no local Vercel link was found.
+    goto git_auto_deploy_message
+  )
+
   echo [deploy] Running direct Vercel production deploy...
   call npx vercel --prod --yes
   if errorlevel 1 (
@@ -198,11 +212,13 @@ if "%DIRECT_VERCEL%"=="1" (
   exit /b 0
 )
 
+:git_auto_deploy_message
 if "%LIKELY_PROD%"=="1" (
-  echo [deploy] Git push completed. Vercel should deploy this branch if it is configured as the production branch.
+  echo [deploy] Git push completed. Vercel should start a production deployment for %CURRENT_BRANCH% if Git integration is enabled.
 ) else (
-  echo [deploy] Git push completed. Vercel should create a preview deployment for this branch when Git integration is enabled.
+  echo [deploy] Git push completed. Vercel should create a preview deployment for %CURRENT_BRANCH% if Git integration is enabled.
+  echo [deploy] Push or merge to main/master when you want the production deployment.
 )
-echo [deploy] Use --push-only to skip the direct Vercel production deploy.
+echo [deploy] Use --direct-vercel when you need an immediate CLI-based production deploy.
 
 exit /b 0
