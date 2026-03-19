@@ -12,6 +12,7 @@ node_modules/
 .env
 .env*.local
 !.env.local.example
+*Access Tokens*.txt
 수파 베이스 비밀번호.txt
 
 # Misc
