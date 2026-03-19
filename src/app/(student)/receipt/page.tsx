@@ -178,8 +178,8 @@ export default function ReceiptPage() {
               ['이름', student.name],
               ['수험번호', student.exam_number ?? '-'],
               ['성별', student.gender ?? '-'],
-              ['응시지역', student.region ?? '-'],
-              ['직렬', student.series ?? '-'],
+              ['응시청', student.region ?? '-'],
+              ['구분', student.series ?? '-'],
             ].map(([k, v]) => (
               <tr key={k} className="border-b border-gray-50 last:border-0">
                 <td className="py-2 pr-4 text-gray-500 w-24">{k}</td>

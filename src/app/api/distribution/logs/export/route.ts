@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '데이터를 불러오지 못했습니다.' }, { status: 500 })
   }
 
-  const header = ['ID', '배부일시(KST)', '학생명', '연락처', '수험번호', '직렬', '지역', '자료명', '처리자', '메모']
+  const header = ['ID', '배부일시(KST)', '학생명', '연락처', '수험번호', '구분', '응시청', '자료명', '처리자', '메모']
   const lines = [
     header.join(','),
     ...rows.map((row) => {

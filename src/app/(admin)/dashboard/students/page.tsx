@@ -19,20 +19,24 @@ function getPageNumbers(current: number, total: number): (number | '...')[] {
   return pages
 }
 
-const SERIES_COLS = ['공채', '구급', '학과', '구조', '기타']
+const LEGACY_SERIES_COLS = ['공채', '구급', '학과', '구조', '기타']
 
 function parseExcelPaste(text: string): { name: string; phone: string; exam_number: string; gender: string; region: string; series: string }[] {
-  return text.trim().split('\n').flatMap(line => {
+  return text.trim().split(/\r?\n/).flatMap(line => {
     const cols = line.split('\t').map(c => c.trim())
     const name = cols[0] ?? ''
     const phone = cols[1] ?? ''
     if (!name || !phone) return []
+    if (name === '이름' && phone.includes('연락처')) return []
+
+    const seriesFromCategory = cols[2] ?? ''
     const exam_number = cols[3] ?? ''
     const gender = cols[4] ?? ''
     const region = cols[5] ?? ''
-    // 직렬: col 6~10 중 'O'/'o' 있는 컬럼명
-    const seriesIdx = SERIES_COLS.findIndex((_, i) => /^o$/i.test(cols[6 + i] ?? ''))
-    const series = seriesIdx >= 0 ? SERIES_COLS[seriesIdx] : ''
+    const legacySeriesIdx = LEGACY_SERIES_COLS.findIndex((_, i) => /^o$/i.test(cols[6 + i] ?? ''))
+    const legacySeries = legacySeriesIdx >= 0 ? LEGACY_SERIES_COLS[legacySeriesIdx] : ''
+    const series = seriesFromCategory || legacySeries
+
     return [{ name, phone, exam_number, gender, region, series }]
   })
 }
@@ -313,24 +317,25 @@ export default function StudentsPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['이름','연락처','수험번호','직렬','지역',''].map(h => (
+                  {['이름', '연락처', '구분', '수험번호', '성별', '응시청', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={6} className="text-center py-10 text-gray-400">로딩 중...</td></tr>
+                  <tr><td colSpan={7} className="text-center py-10 text-gray-400">로딩 중...</td></tr>
                 ) : loadError ? (
-                  <tr><td colSpan={6} className="text-center py-10 text-red-400">데이터를 불러오지 못했습니다. <button onClick={load} className="underline">다시 시도</button></td></tr>
+                  <tr><td colSpan={7} className="text-center py-10 text-red-400">데이터를 불러오지 못했습니다. <button onClick={load} className="underline">다시 시도</button></td></tr>
                 ) : students.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-10 text-gray-400">학생이 없습니다.</td></tr>
+                  <tr><td colSpan={7} className="text-center py-10 text-gray-400">학생이 없습니다.</td></tr>
                 ) : students.map(s => (
                   <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium">{s.name}</td>
                     <td className="px-4 py-3 text-gray-600">{s.phone}</td>
-                    <td className="px-4 py-3 text-gray-600">{s.exam_number ?? '-'}</td>
                     <td className="px-4 py-3 text-gray-600">{s.series ?? '-'}</td>
+                    <td className="px-4 py-3 text-gray-600">{s.exam_number ?? '-'}</td>
+                    <td className="px-4 py-3 text-gray-600">{s.gender ?? '-'}</td>
                     <td className="px-4 py-3 text-gray-600">{s.region ?? '-'}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex gap-3 items-center">
@@ -424,7 +429,7 @@ export default function StudentsPage() {
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">이름</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">수험번호</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">직렬</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">구분</th>
                       {rcMaterials.map(m => (
                         <th key={m.id} className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap min-w-[80px]">
                           {m.name}
@@ -581,7 +586,7 @@ export default function StudentsPage() {
                             className="cursor-pointer"
                           />
                         </th>
-                        {['이름', '수험번호', '직렬', '지역', '배부'].map(h => (
+                        {['이름', '수험번호', '구분', '응시청', '배부'].map(h => (
                           <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500">{h}</th>
                         ))}
                       </tr>
@@ -634,7 +639,7 @@ export default function StudentsPage() {
             <h2 className="text-lg font-bold mb-1">엑셀 붙여넣기 대량 등록</h2>
             <p className="text-xs text-gray-500 mb-3">
               엑셀에서 데이터 행을 선택 후 복사(Ctrl+C)하여 아래에 붙여넣기(Ctrl+V)하세요.<br />
-              컬럼 순서: <strong>이름 / 연락처 / 구분 / 수험번호 / 성별 / 응시지역 / 공채 / 구급 / 학과 / 구조 / 기타</strong>
+              컬럼 순서: <strong>이름 / 연락처 / 구분 / 수험번호 / 성별 / 응시청</strong>
             </p>
             <textarea
               className="w-full h-32 px-3 py-2 border border-gray-200 text-sm font-mono focus:outline-none focus:border-blue-900 resize-none"
@@ -649,7 +654,7 @@ export default function StudentsPage() {
                 <table className="w-full text-xs border border-gray-200">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      {['이름','연락처','수험번호','성별','지역','직렬'].map(h => (
+                      {['이름', '연락처', '구분', '수험번호', '성별', '응시청'].map(h => (
                         <th key={h} className="px-2 py-2 text-left text-gray-500 font-medium">{h}</th>
                       ))}
                     </tr>
@@ -659,10 +664,10 @@ export default function StudentsPage() {
                       <tr key={i} className="border-t border-gray-100">
                         <td className="px-2 py-1">{r.name}</td>
                         <td className="px-2 py-1">{r.phone}</td>
+                        <td className="px-2 py-1">{r.series || '-'}</td>
                         <td className="px-2 py-1">{r.exam_number || '-'}</td>
                         <td className="px-2 py-1">{r.gender || '-'}</td>
                         <td className="px-2 py-1">{r.region || '-'}</td>
-                        <td className="px-2 py-1">{r.series || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -695,7 +700,7 @@ export default function StudentsPage() {
           <div className="bg-white p-6 w-full max-w-md border border-gray-200" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">{editId ? '학생 수정' : '학생 추가'}</h2>
             <div className="flex flex-col gap-3">
-              {([['name','이름*'],['phone','연락처*'],['exam_number','수험번호'],['gender','성별'],['region','응시지역'],['series','직렬']] as [keyof typeof form, string][]).map(([key, label]) => (
+              {([['name', '이름*'], ['phone', '연락처*'], ['series', '구분'], ['exam_number', '수험번호'], ['gender', '성별'], ['region', '응시청']] as [keyof typeof form, string][]).map(([key, label]) => (
                 <div key={key}>
                   <label className="text-xs text-gray-500 mb-1 block">{label}</label>
                   <input value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}

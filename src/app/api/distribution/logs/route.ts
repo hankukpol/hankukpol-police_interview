@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   let query = db
     .from('distribution_logs')
     .select(
-      'id, distributed_at, distributed_by, note, students(name, exam_number, series), materials(name)',
+      'id, distributed_at, distributed_by, note, students(name, exam_number, series, region), materials(name)',
       { count: 'exact' }
     )
     .order('distributed_at', { ascending: false })

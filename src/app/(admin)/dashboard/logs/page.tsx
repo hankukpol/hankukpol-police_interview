@@ -17,7 +17,7 @@ interface Log {
   distributed_at: string
   distributed_by: string
   note: string
-  students: { name: string; exam_number: string | null; series: string | null }
+  students: { name: string; exam_number: string | null; series: string | null; region: string | null }
   materials: { name: string }
 }
 
@@ -134,18 +134,18 @@ export default function LogsPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {['일시','학생','수험번호','직렬','자료','처리자',''].map(h => (
+              {['일시', '학생', '수험번호', '구분', '응시청', '자료', '처리자', ''].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-400">로딩 중...</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-gray-400">로딩 중...</td></tr>
             ) : loadError ? (
-              <tr><td colSpan={7} className="text-center py-10 text-red-400">데이터를 불러오지 못했습니다. <button onClick={load} className="underline">다시 시도</button></td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-red-400">데이터를 불러오지 못했습니다. <button onClick={load} className="underline">다시 시도</button></td></tr>
             ) : logs.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-400">배부 기록이 없습니다.</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-gray-400">배부 기록이 없습니다.</td></tr>
             ) : logs.map(l => (
               <tr key={l.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
@@ -154,6 +154,7 @@ export default function LogsPage() {
                 <td className="px-4 py-3 font-medium">{l.students?.name}</td>
                 <td className="px-4 py-3 text-gray-600">{l.students?.exam_number ?? '-'}</td>
                 <td className="px-4 py-3 text-gray-600">{l.students?.series ?? '-'}</td>
+                <td className="px-4 py-3 text-gray-600">{l.students?.region ?? '-'}</td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 text-xs font-medium">
                     {l.materials?.name}

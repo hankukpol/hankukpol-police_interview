@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
       const { data: student } = await db
         .from('students')
-        .select('name, exam_number, series')
+        .select('name, exam_number, series, region')
         .eq('id', qrPayload.sid)
         .single()
 
@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
         studentName: student?.name ?? '',
         examNumber: student?.exam_number ?? '',
         series: student?.series ?? '',
+        region: student?.region ?? '',
         distributedAt: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
       })
     } catch {
@@ -117,7 +118,7 @@ export async function POST(req: NextRequest) {
 
       const { data: student } = await db
         .from('students')
-        .select('name, exam_number, series')
+        .select('name, exam_number, series, region')
         .eq('id', qrPayload.sid)
         .single()
 
@@ -127,6 +128,7 @@ export async function POST(req: NextRequest) {
         studentName: student?.name ?? '',
         examNumber: student?.exam_number ?? '',
         series: student?.series ?? '',
+        region: student?.region ?? '',
         distributedAt: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
       })
     } catch {
@@ -136,7 +138,7 @@ export async function POST(req: NextRequest) {
 
   const { data: student } = await db
     .from('students')
-    .select('name, exam_number, series')
+    .select('name, exam_number, series, region')
     .eq('id', qrPayload.sid)
     .single()
 
@@ -148,5 +150,6 @@ export async function POST(req: NextRequest) {
     studentName: student?.name ?? '',
     examNumber: student?.exam_number ?? '',
     series: student?.series ?? '',
+    region: student?.region ?? '',
   })
 }

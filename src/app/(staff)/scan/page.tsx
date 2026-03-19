@@ -15,6 +15,7 @@ interface ScanResult {
   studentName?: string
   examNumber?: string
   series?: string
+  region?: string
   needsSelection?: boolean
   unreceived?: { id: number; name: string }[]
 }
@@ -540,7 +541,8 @@ export default function ScanPage() {
               <div className="bg-white border border-gray-100 p-4 mb-3">
                 {selectResult.studentName && <div className="flex justify-between py-2 border-b border-gray-50"><span className="text-sm text-gray-500">이름</span><span className="text-sm font-semibold">{selectResult.studentName}</span></div>}
                 {selectResult.examNumber && <div className="flex justify-between py-2 border-b border-gray-50"><span className="text-sm text-gray-500">수험번호</span><span className="text-sm font-semibold">{selectResult.examNumber}</span></div>}
-                {selectResult.series && <div className="flex justify-between py-2"><span className="text-sm text-gray-500">직렬</span><span className="text-sm font-semibold">{selectResult.series}</span></div>}
+                {selectResult.series && <div className="flex justify-between py-2 border-b border-gray-50"><span className="text-sm text-gray-500">구분</span><span className="text-sm font-semibold">{selectResult.series}</span></div>}
+                {selectResult.region && <div className="flex justify-between py-2"><span className="text-sm text-gray-500">응시청</span><span className="text-sm font-semibold">{selectResult.region}</span></div>}
               </div>
               <p className="text-sm font-semibold text-gray-700 mb-2">배부할 자료를 선택하세요</p>
               <div className="flex flex-col gap-2">
